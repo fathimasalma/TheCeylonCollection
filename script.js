@@ -157,8 +157,11 @@ function bookNowHandler() {
       kidGuide.checked
     ),
   };
-  totalCost =
-    (room.roomCost || 0) + (adventure.adventureCost || 0 - discountAmount);
+
+  let discountAmount;
+
+  // Calculate total cost without discount first
+  totalCost = (room.roomCost || 0) + (adventure.adventureCost || 0);
 
   resetCurrentBooking();
 
@@ -231,11 +234,10 @@ function bookNowHandler() {
   currentBooking = { guest, room, adventure, totalCost };
   currentBooking.currentRoomCost = room.roomCost || 0;
   currentBooking.currentAdventureCost = adventure.adventureCost || 0;
-  const discountAmount = applyPromoCode();
-  totalCost =
-    currentBooking.currentRoomCost +
-    currentBooking.currentAdventureCost -
-    discountAmount;
+
+  discountAmount = applyPromoCode();
+  totalCost -= discountAmount;
+
   overallTotalCost.innerHTML = `LKR ${totalCost}`;
   overallTotalCost.style.fontSize = "16px";
   overallTotalCost.style.textAlign = "left";
@@ -273,9 +275,13 @@ function calculateRoomCost(roomType, noOfRooms, extraBed, kidsMeal) {
     default:
       break;
   }
+
   const kidsMealCost = 5000.0 * parseInt(kidsMeal, 10);
   const extraBedCost = 8000.0 * parseInt(extraBed, 10);
   roomCost += kidsMealCost + extraBedCost;
+
+  roomCost *= parseInt(noOfRooms, 10);
+
   return roomCost;
 }
 
@@ -552,6 +558,8 @@ if (bookAdventureButton) {
 
 function closePopup() {
   document.getElementById("popup").style.display = "none";
+
+  resetCurrentBooking();
 }
 
 function getAdventureDetails() {
